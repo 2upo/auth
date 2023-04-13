@@ -1,6 +1,12 @@
-from pydantic import BaseSettings
+from pydantic import BaseSettings, BaseModel
+import base64
+from typing import List
 
-class Settings(BaseSettings):
+
+__settings = None
+
+
+class __Settings(BaseSettings):
     DATABASE_PORT: int
     POSTGRES_PASSWORD: str
     POSTGRES_USER: str
@@ -20,5 +26,28 @@ class Settings(BaseSettings):
         env_file = './.env'
 
 
-settings = Settings()
+    class AuthSettings(BaseModel):
+        authjwt_algorithm: str = __settings.JWT_ALGORITHM
+        authjwt_decode_algorithms: List[str] = [__settings.JWT_ALGORITHM]
+        authjwt_token_location: set = {'cookies', 'headers'}
+        authjwt_access_cookie_key: str = 'access_token'
+        authjwt_refresh_cookie_key: str = 'refresh_token'
+        authjwt_public_key: str = base64.b64decode(
+            __settings.JWT_PUBLIC_KEY).decode('utf-8')
+        authjwt_private_key: str = base64.b64decode(
+            __settings.JWT_PRIVATE_KEY).decode('utf-8')
+
+
+
+def get_config() -> __Settings:
+    if not __settings:
+        __settings = __Settings()
+    return __settings
+
+
+
+
+
+
+
 

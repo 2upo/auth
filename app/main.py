@@ -1,30 +1,45 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings
-from app.routers import user, auth
+from app.config import get_config 
+from app.users import auth_controller
+from app.users import user_controller
+from fastapi_jwt_auth import AuthJWT
 
-#make class for this file and create factory method(return app instance)
-#builder patern
-app = FastAPI()
+class App(FastAPI):
 
-origins = [
-    settings.CLIENT_ORIGIN,
-]
+    config = get_config()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-app.include_router(auth.router, tags=['Auth'], prefix='/api/auth')
-app.include_router(user.router, tags=['Users'], prefix='/api/users')
+    def init_middleware(self):
+        self.add_middleware(
+            CORSMiddleware,
+            allow_origins=[self.config.CLIENT_ORIGIN],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
 
-@app.get('/api/healthcheck')
-def root():
-    return {'message': 'healthy'}
+    def init_router(self):
+        self.include_router(auth_controller.router, tags=['Auth'], prefix='/api/auth')
+        self.include_router(user_controller.router, tags=['Users'], prefix='/api/users')
+
+
+    def init_healthcheck(self):
+        def root():
+            return {'message': 'healthy'}
+        
+        self.get('/api/healthcheck')(root)
+
+
+    def init_auth_config(self):
+        AuthJWT.load_config(lambda : self.config.AuthSettings())
+    
+
+def create_app():
+    app = App()
+    app.init_auth_config()
+    app.init_middleware()
+    app.init_healthcheck()
+    app.init_router()
+    return app
 

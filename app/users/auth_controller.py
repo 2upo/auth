@@ -3,7 +3,8 @@ from fastapi import APIRouter, Request, Response, status, Depends, HTTPException
 from pydantic import EmailStr
 
 from app import oauth2
-from .. import schemas, models, utils
+from ..users import models, schemas
+from .. import utils
 from sqlalchemy.orm import Session
 from ..database import get_db
 from app.oauth2 import AuthJWT
@@ -14,9 +15,9 @@ router = APIRouter()
 
 # all db remove
 @router.post('/register', status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse)
-async def create_user(payload: schemas.CreateUserSchema, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(
-        models.User.email == EmailStr(payload.email.lower())).first()
+async def create_user(payload: schemas.CreateUserSchema):
+    # user = db.query(models.User).filter(
+    #     models.User.email == EmailStr(payload.email.lower())).first()
     if user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                             detail='Account already exist')
@@ -37,10 +38,10 @@ async def create_user(payload: schemas.CreateUserSchema, db: Session = Depends(g
 
 
 @router.post('/login')
-def login(payload: schemas.LoginUserSchema, response: Response, db: Session = Depends(get_db), Authorize: AuthJWT = Depends()):
+def login(payload: schemas.LoginUserSchema, response: Response, Authorize: AuthJWT = Depends()):
     #repo
-    user = db.query(models.User).filter(
-        models.User.email == EmailStr(payload.email.lower())).first()
+    # user = db.query(models.User).filter(
+    #     models.User.email == EmailStr(payload.email.lower())).first()
     #excepto
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -65,7 +66,7 @@ def login(payload: schemas.LoginUserSchema, response: Response, db: Session = De
 
 
 @router.get('/refresh')
-def refresh_token(response: Response, request: Request, Authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
+def refresh_token(response: Response, request: Request, Authorize: AuthJWT = Depends()):
     try:
         Authorize.jwt_refresh_token_required()
 
@@ -73,7 +74,7 @@ def refresh_token(response: Response, request: Request, Authorize: AuthJWT = Dep
         if not user_id:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Could not refresh access token')
-        user = db.query(models.User).filter(models.User.id == user_id).first()
+        # user = db.query(models.User).filter(models.User.id == user_id).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='The user belonging to this token no logger exist')

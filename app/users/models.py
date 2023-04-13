@@ -1,10 +1,11 @@
 import uuid
-from .database import Base
+from ..database import Base
 from sqlalchemy import TIMESTAMP, Column, String, Boolean, text
 from sqlalchemy.dialects.postgresql import UUID
+from ..utils import CustomBaseModel
 
 #tests
-class User(Base):
+class User(Base, CustomBaseModel):
     __tablename__ = 'users'
     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False,
                 default=uuid.uuid4)
@@ -18,4 +19,6 @@ class User(Base):
                         nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True),
                         nullable=False, server_default=text("now()"))
+    
+
     
