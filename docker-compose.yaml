@@ -1,5 +1,10 @@
 version: '3'
 services:
+  test:
+    build: .
+    env_file:
+      - ./.env
+      - ./.env.test
   postgres:
     image: postgres
     container_name: postgres

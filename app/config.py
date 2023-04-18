@@ -22,7 +22,7 @@ class __Settings(BaseSettings):
     CLIENT_ORIGIN: str
 
     class Config:
-        env_file = './.env'
+        env_file = "./.env"
 
 # TODO: pass the link to this function in main.py as we do lambda
     def auth_settings(self):
