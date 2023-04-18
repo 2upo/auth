@@ -44,7 +44,7 @@ class App(FastAPI):
 
 
     def init_auth_config(self):
-        AuthJWT.load_config(lambda : self.config.AuthSettings())
+        AuthJWT.load_config(self.config.auth_settings)
     
 
 def create_app():

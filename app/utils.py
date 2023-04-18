@@ -3,19 +3,6 @@
 # from fastapi_jwt_auth import AuthJWT
 # from repository import get_by_id
 
-from database import get_db
-from fastapi import Depends
-
-
-class CustomBaseModel():
-
-    _excluded_fields = []
-
-    def to_dict(self):
-        res = {k:v for k, v in self.__dict__.items() if k not in self._excluded_fields}
-        res.pop("_sa_instance_state")
-        return res
-
 
 # # remove depends
 # def require_user(authorize: AuthJWT = Depends()):
@@ -46,4 +33,4 @@ class CustomBaseModel():
     #         status_code=status.HTTP_401_UNAUTHORIZED, detail='Token is invalid or has expired')
     # return user_id
 
-def create_all():
+#def create_all():
