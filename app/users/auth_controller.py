@@ -5,8 +5,6 @@ from pydantic import EmailStr
 from app import oauth2
 from ..users import models, schemas
 from .. import utils
-from sqlalchemy.orm import Session
-from ..database import get_db
 from app.oauth2 import AuthJWT
 from ..config import settings
 
@@ -31,10 +29,10 @@ async def create_user(payload: schemas.CreateUserSchema):
     payload.verified = True
     payload.email = EmailStr(payload.email.lower())
     new_user = models.User(**payload.dict())
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    # db.add(new_user)
+    # db.commit()
+    # db.refresh(new_user)
+    # return new_user
 
 
 @router.post('/login')

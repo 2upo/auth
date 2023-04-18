@@ -1,8 +1,10 @@
 import uuid
-from ..database import Base
+from ..database import Database
 from sqlalchemy import TIMESTAMP, Column, String, Boolean, text
 from sqlalchemy.dialects.postgresql import UUID
 from ..utils import CustomBaseModel
+
+Base = Database().Base
 
 #tests
 class User(Base, CustomBaseModel):

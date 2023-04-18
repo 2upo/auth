@@ -4,10 +4,17 @@ from app.config import get_config
 from app.users import auth_controller
 from app.users import user_controller
 from fastapi_jwt_auth import AuthJWT
+from database import Database
+from sqlalchemy import text
+
 
 class App(FastAPI):
 
     config = get_config()
+
+    def init_database(self):
+        assert Database().session().execute( text('select 42'))
+
 
     def init_middleware(self):
         self.add_middleware(
@@ -26,6 +33,11 @@ class App(FastAPI):
 
     def init_healthcheck(self):
         def root():
+            #TODO add exception
+            try:
+                Database().session().execute( text('select 42'))
+            except:
+                pass
             return {'message': 'healthy'}
         
         self.get('/api/healthcheck')(root)
@@ -37,6 +49,7 @@ class App(FastAPI):
 
 def create_app():
     app = App()
+    app.init_database()
     app.init_auth_config()
     app.init_middleware()
     app.init_healthcheck()

@@ -15,3 +15,5 @@ class UserNotFound(BaseServiceException):
             status_code=http.HTTPStatus.NOT_FOUND,
             detail="User not found"
         )
+
+

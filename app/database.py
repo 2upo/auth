@@ -1,22 +1,50 @@
-from sqlalchemy import create_engine
+import threading
+
+from sqlalchemy import URL, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from .config import settings
+from sqlalchemy.orm import Session, sessionmaker
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOSTNAME}:{settings.DATABASE_PORT}/{settings.POSTGRES_DB}"
+from .config import get_config
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+
+class __Database:
+    __config = get_config()
+
+
+    def __init__(self) -> None:
+        self.engine = create_engine(
+            url_object = URL.create(
+                "postgresql",
+                username= self.__config.POSTGRES_USER,
+                password= self.__config.POSTGRES_PASSWORD,
+                host= self.__config.POSTGRES_HOSTNAME,
+                port = self.__config.DATABASE_PORT,
+                database= self.__config.POSTGRES_DB,
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        self.Base = declarative_base()
 
-Base = declarative_base()
+
+    def session(self) -> Session:
+        db_session = self.SessionLocal()
+        try:
+            yield db_session
+        finally:
+            db_session.close()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class Database:
+    _db = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._db is None:
+            with cls._lock:
+                if not cls._db:
+                    cls._db = __Database()
+        return cls._db
+
+
+
 
